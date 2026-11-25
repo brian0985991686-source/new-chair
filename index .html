@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>智椅工坊 · 智慧組裝線監控</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#07090a;--card:#101514;--ink:#e8f1ee;--mut:#8aa098;--line:#1f2b28;--pri:#2dd4bf;--pri2:#0f2e29;--bad:#f87171;--bad2:#2a1214;--warn:#fbbf24;--warn2:#2b2108;--ok:#4ade80;--ok2:#0f2a1a}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{max-width:1100px;margin:auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.logo{font-weight:800;font-size:18px;margin-right:auto}.logo small{display:block;font-size:11px;font-weight:500;color:var(--mut)}
+nav{display:flex;gap:4px;background:var(--bg);padding:3px;border-radius:12px}
+nav a{padding:7px 14px;border-radius:9px;color:var(--mut);text-decoration:none;font-weight:600;font-size:14px}
+nav a.on{background:var(--pri);color:#fff}
+select,input,button{font:inherit;color:inherit}
+select,input{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:6px 9px;min-width:0}
+button,.btn{background:var(--pri);color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+button.ghost{background:transparent;color:var(--pri);border:1px solid var(--pri)}button:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1100px;margin:auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h2{font-size:16px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.kpi b{display:block;font-size:26px;line-height:1.2}.kpi span{font-size:12px;color:var(--mut)}.kpi.good b{color:var(--ok)}.kpi.bad b{color:var(--bad)}
+.banner{padding:10px 14px;border-radius:12px;background:var(--bad2);color:var(--bad);font-weight:600;margin-bottom:14px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:84px;text-align:center;font-weight:700}
+.chip small{display:block;font-weight:500;color:var(--mut);font-size:12px}
+.chip.bn{background:var(--bad2);border-color:var(--bad);color:var(--bad)}.chip.lo{background:var(--warn2);border-color:var(--warn)}.chip.ok{background:var(--ok2);border-color:var(--ok)}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600;font-size:12px}
+tr.bn td{background:var(--bad2)}.u{display:inline-block;width:60px;height:7px;background:var(--line);border-radius:5px;margin-right:6px;vertical-align:middle;overflow:hidden}.u i{display:block;height:100%;background:var(--pri)}
+.tag{font-size:11px;padding:2px 7px;border-radius:99px;background:var(--bad);color:#fff;margin-left:6px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.mut{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.qc{border:2px dashed var(--line);border-radius:14px;padding:12px;text-align:center;break-inside:avoid}.qc h3{margin:0}.qc input{width:100%;margin-top:6px;text-align:center}.qc .q{display:flex;justify-content:center;margin:8px 0;background:#fff;padding:8px;border-radius:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:5px;animation:p 1.6s infinite}@keyframes p{50%{opacity:.3}}
+.big{font:800 54px/1 ui-monospace,monospace;text-align:center;margin:10px 0;font-variant-numeric:tabular-nums}
+.act{width:100%;padding:18px;font-size:19px;border-radius:14px}.act.fin{background:var(--bad)}
+#cam{max-width:340px;margin:10px auto;border-radius:12px;overflow:hidden}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:9;max-width:90vw}#toast.on{opacity:1}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:6px 16px 28px}
+button,.btn,nav a.on{color:#03211d}button.ghost{color:var(--pri)}.act.fin,.tag{color:#fff}
+@media(max-width:560px){.logo small{display:none}nav{order:3;width:100%;justify-content:space-around}}
+@media print{header,footer,.np{display:none!important}.card{border:0}body{background:#fff}}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <div class="logo">🪑 智椅工坊<small>QR Code 智慧監控 × 組裝流程改良</small></div>
+  <nav id="nav"><a href="#/dashboard" data-v="dashboard">看板</a><a href="#/qr" data-v="qr">桌牌</a><a href="#/timer" data-v="timer">計時</a></nav>
+  <div class="row" id="ctl">
+    <select id="g" aria-label="組別"></select><select id="r" aria-label="場次"></select>
+    <button id="lk" class="ghost">🔒</button><span class="mut"><i class="dot"></i>每 3 秒同步</span>
+  </div>
+</div></header>
+<main id="app"></main>
+<footer>資料僅用於流程改善，作業員不具名、不做個人績效評比。</footer>
+<div id="toast"></div>
+<script>
+const SB="https://iomsrjkrvuzrsluirtdj.supabase.co",KEY="sb_publishable_QmLToEOs4wEEPBnASz0dxg_o0hhtgLO";
+const api=async(p,m="GET",b)=>{const r=await fetch(`${SB}/rest/v1/${p}`,{method:m,headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json",Prefer:"return=minimal"},body:b&&JSON.stringify(b)});if(!r.ok)throw Error(r.status);return m==="GET"?r.json():null};
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const S=Object.assign({group:"G01",round:"1",cfg:{},watts:60,coef:0.467,thr:1.5,pin:"0000",arch:{},mat:{},tmode:"scan"},JSON.parse(localStorage.ie2||"{}"));
+const save=()=>localStorage.ie2=JSON.stringify(S);
+let tm,T={};
+const toast=t=>{const e=$("#toast");e.textContent=t;e.className="on";clearTimeout(toast.t);toast.t=setTimeout(()=>e.className="",2600)};
+const beep=(f,d=.12)=>{try{const c=beep.c??=new AudioContext(),o=c.createOscillator();o.frequency.value=f;o.connect(c.destination);o.start();o.stop(c.currentTime+d)}catch{}};
+mermaid.initialize({startOnLoad:false,theme:"dark"});
+const enc=r=>r==="OFFICIAL"?1:100+ +r,dec=n=>n===1?"OFFICIAL":n>100&&n<=110?String(n-100):null,lab=r=>r==="OFFICIAL"?"🏆 正式實作":"🧪 第 "+r+" 次測試";
+const rop=v=>Array.from({length:10},(_,i)=>`<option value="${i+1}" ${v==i+1?"selected":""}>${lab(String(i+1))}</option>`).join("")+`<option value="OFFICIAL" ${v==="OFFICIAL"?"selected":""}>${lab("OFFICIAL")}</option>`;
+const LIMS='<option value="0">無限制 ∞</option>'+[1,2,3,4,5,6,8,10].map(v=>`<option>${v}</option>`).join("");
+let adT=+sessionStorage.adT||0;const adm=()=>Date.now()<adT;
+const upW=async(g,st,b)=>{const x=await api(`station_wip?group_id=eq.${g}&station_id=eq.${st}&select=id`),d={...b,updated_at:new Date().toISOString()};x.length?await api(`station_wip?id=eq.${x[0].id}`,"PATCH",d):await api("station_wip","POST",{group_id:g,station_id:st,...d})};
+// ---- 場次 / 流程規則（與原系統相同）----
+const fk=(g,r)=>r==="OFFICIAL"?g+"-OFFICIAL":`${g}-T${r}`;
+const pre=r=>r==="OFFICIAL"?"":`TEST${r}-`;
+const inRound=(e,r)=>{const p=(e.product_id||"").toUpperCase();return r==="OFFICIAL"?!p.startsWith("TEST"):p.startsWith(`TEST${r}-`)||(r==="1"&&p.startsWith("TEST-"))};
+async function flows(g,r){const rows=await api(`station_flow?or=(group_id.eq.${g},group_id.like.${g}-*)&select=*`),by={};rows.forEach(x=>(by[x.group_id.trim()]??=[]).push(x));
+  const ks=[fk(g,r)];if(r==="OFFICIAL")for(let i=10;i>0;i--)ks.push(`${g}-T${i}`);else for(let i=+r-1;i>0;i--)ks.push(`${g}-T${i}`);ks.push(g);
+  for(const k of ks)if(by[k])return by[k];return[]}
+const stOf=fl=>[...new Set(fl.flatMap(f=>[f.station_id,f.next_station_id]).map(x=>(x||"").trim()).filter(Boolean))].sort();
+const PRESET={9:{n:Array.from({length:9},(_,i)=>`工站 ${i+1}`),nx:i=>i<8?`ST0${i+2}`:""},
+  7:{n:["椅腳組裝 ASM1","椅腳組裝 ASM2","椅腳組裝 ASM3","椅腳組裝 ASM4","椅架合併 ASM5","裝椅桿等零件","品檢・組成成品・包裝"],nx:i=>i<4?"ST05":i==4?"ST06":i==5?"ST07":""}};
+// ---- 統計（定義同提案書表 1）----
+function calc(ev,fl){const t=x=>new Date(x).getTime(),L=ev.length?Math.min(...ev.map(e=>t(e.start_time))):0,by={};
+  ev.forEach(e=>(by[e.station_id]??=[]).push(e));const st={};
+  for(const k in by){const a=by[k].sort((x,y)=>t(x.start_time)-t(y.start_time));let run=0,wait=0;
+    a.forEach((e,i)=>{run+=+e.duration_sec||0;const g=(t(e.start_time)-(i?t(a[i-1].finish_time):L))/1000;if(g>0&&g<600)wait+=g});
+    const ct=run/a.length,sd=a.filter(e=>a.length>=3&&+e.duration_sec>S.thr*ct).length;
+    st[k]={n:a.length,run,wait,ct,util:run+wait?run/(run+wait)*100:0,alerts:sd,a}}
+  const ks=Object.keys(st).sort(),maxCT=Math.max(0,...ks.map(k=>st[k].ct)),bn=ks.find(k=>st[k].ct===maxCT&&maxCT>0),sumCT=ks.reduce((s,k)=>s+st[k].ct,0);
+  const run=ks.reduce((s,k)=>s+st[k].run,0),wait=ks.reduce((s,k)=>s+st[k].wait,0);
+  const term=stOf(fl).filter(s=>!fl.some(f=>f.station_id.trim()===s&&(f.next_station_id||"").trim())).pop()||ks[ks.length-1],out=st[term]?st[term].a:[];
+  const fin=out.map(e=>t(e.finish_time)).sort((a,b)=>a-b),span=ev.length?(Math.max(...ev.map(e=>t(e.finish_time)))-L)/1000:0;
+  const iv=fin.slice(1).map((x,i)=>(x-fin[i])/1000),l3=iv.slice(-3);
+  return{st,ks,maxCT,bn,sumCT,run,wait,term,outN:out.length,span,actCT:out.length?span/out.length:null,
+    steady:iv.length?fin.length>1?(fin.at(-1)-fin[0])/1000/(fin.length-1):null:null,pred:l3.length?l3.reduce((a,b)=>a+b,0)/l3.length:null,
+    lb:ks.length&&maxCT?sumCT/(ks.length*maxCT)*100:null,util:run+wait?run/(run+wait)*100:null,bad:ev.filter(e=>(e.status||"").startsWith("REWORK")).length}}
+const f1=(x,u="")=>x==null?"--":x.toFixed(1)+u;
+// ---- 看板 ----
+async function dash(){const g=S.group,r=S.round;
+  try{const[ev0,fl,gm]=await Promise.all([api(`event?group_id=eq.${g}&select=*&order=start_time.asc`),flows(g,r),api(`station_wip?group_id=eq.${g}&station_id=eq.GROUP_MODE&select=input_wip`).catch(()=>[])]);const live=gm.length?dec(gm[0].input_wip):null;
+  const ev=ev0.filter(e=>inRound(e,r)),mt=(S.mat[fk(g,r)]??={w:0,c:0}),mkg=mt.w/1000*mt.c,c=calc(ev,fl),kwh=c.wait/3600*S.watts/1000,kg=kwh*S.coef;
+  const k=(v,l,ok,tg)=>`<div class="kpi ${ok==null?"":ok?"good":"bad"}"><b>${v}</b><span>${l}${tg?`｜目標 ${tg}`:""}</span></div>`;
+  $("#dv").innerHTML=(c.bn?`<div class="banner">🚨 目前瓶頸：${c.bn}（平均 CT ${f1(c.maxCT,"s")}），限制整條線產出</div>`:"")+
+  `<div class="kpis">${k(c.outN+" 組","終點站 "+(c.term||"-")+" 產出")}${k(f1(c.actCT,"s"),"本次生產活動 CT /組",c.actCT==null?null:c.actCT<=133,"≤133s")}${k(f1(c.steady,"s"),"穩態產出間隔 /組")}
+  ${k(f1(c.lb,"%"),"線平衡率",c.lb==null?null:c.lb>=85,"≥85%")}${k(f1(c.util,"%"),"全線稼動率",c.util==null?null:c.util>=65,"≥65%")}${k(f1(c.wait,"s"),"總等待時間")}${k(f1(c.pred,"s"),"下一組預測（3 期移動平均）")}${k(c.bad,"重工／不良筆數")}</div>
+  <div class="card"><h2>工站順序與 WIP <span class="mut">${esc(fk(g,r))}｜${stOf(fl).length||c.ks.length} 站</span></h2><div id="mm" style="overflow-x:auto"></div><div class="flow">${(stOf(fl).length?stOf(fl):c.ks).map((s,i,a)=>{const x=c.st[s],cl=s===c.bn?"bn":x&&x.util<50?"lo":x?"ok":"";
+    return`<div class="chip ${cl}">${s}<small>${x?x.n+" 件 · "+f1(x.ct,"s"):"尚無資料"}</small></div>${i<a.length-1?"<span class=mut>›</span>":""}`}).join("")||'<span class="mut">此場次尚無流程，請到「桌牌」頁套用 9 站或 7 站流程。</span>'}</div>
+  <p class="mut" style="margin:8px 0 0">🔴 瓶頸（CT 最大）　🟡 稼動率低於 50%（缺料等待）　🟢 流暢</p></div>
+  <div class="card"><h2>統計摘要與 CT 分析</h2><div class="tw"><table><tr><th>工站<th>件數<th>平均 CT<th>作業總時<th>平均等待<th>等待總時<th>稼動率<th>異常 (>${S.thr}×)</tr>
+  ${c.ks.map(s=>{const x=c.st[s];return`<tr class="${s===c.bn?"bn":""}"><td>${s}${s===c.bn?'<span class="tag">瓶頸</span>':""}<td>${x.n}<td>${f1(x.ct)}<td>${f1(x.run)}<td>${f1(x.wait/x.n)}<td>${f1(x.wait)}<td><span class="u"><i style="width:${x.util}%"></i></span>${f1(x.util,"%")}<td>${x.alerts||"-"}</tr>`}).join("")||'<tr><td colspan=8 class="mut">尚無完工紀錄</tr>'}
+  ${c.ks.length?`<tr><td><b>全線</b><td>${c.ks.reduce((s,k)=>s+c.st[k].n,0)}<td>Σ ${f1(c.sumCT)}<td>${f1(c.run)}<td><td>${f1(c.wait)}<td>${f1(c.util,"%")}<td></tr>`:""}</table></div></div>
+  <div class="card"><h2>減碳估算（閒置耗電）</h2><div class="row"><label class="mut">每站閒置功率 <input id="w" type="number" min="0" value="${S.watts}" style="width:76px"> W</label>
+  <label class="mut">電力排碳係數 <select id="co">${[[.467,"公用售電業 0.467"],[.466,"產業 0.466"],[.471,"民生住宅 0.471"]].map(([v,l])=>`<option value="${v}" ${v==S.coef?"selected":""}>${l}</option>`).join("")}</select> kgCO₂e/kWh</label>
+  <label class="mut">重工／報廢重量 <input id="mw" type="number" min="0" value="${mt.w}" style="width:80px"> g</label><label class="mut">材料係數 <input id="mc" type="number" step=".01" min="0" value="${mt.c}" style="width:80px"> kgCO₂e/kg</label><label class="mut">異常門檻 <input id="th" type="number" step=".1" min="1" value="${S.thr}" style="width:64px"> × 平均 CT</label></div>
+  <p style="margin:10px 0 0">等待 ${f1(c.wait,"s")} → <b>${kwh.toFixed(4)} kWh</b> → <b>${(kg*1000).toFixed(2)} gCO₂e</b> ＋ 材料 <b>${(mkg*1000).toFixed(2)} gCO₂e</b> ＝ <b>${((kg+mkg)*1000).toFixed(2)} gCO₂e</b>　<span class="mut">（電力係數：能源署 114 年度公告；材料係數請查環境部碳足跡資料集後填入，未填視為 0）</span></p></div>
+  <div class="card"><h2>事件紀錄（最近 15 筆）<button id="csv" class="ghost np" ${ev0.length?"":"disabled"}>⬇ 下載 CSV</button></h2><div class="tw"><table><tr><th>產品<th>工站<th>開始<th>秒數<th>WIP 前→後<th>狀態</tr>
+  ${ev.slice(-15).reverse().map(e=>`<tr><td>${esc(e.product_id)}<td>${esc(e.station_id)}<td>${new Date(e.start_time).toLocaleTimeString()}<td>${f1(+e.duration_sec)}<td>${e.wip_before_start??"-"}→${e.wip_after_finish??"-"}<td>${esc(e.status)}</tr>`).join("")||'<tr><td colspan=6 class="mut">尚無紀錄</tr>'}</table></div></div>
+  ${adm()?`<div class="card"><h2>管理員 <span class="mut">目前全組實作場次：${live?lab(live):"未設定"}</span></h2><div class="row"><select id="lm">${rop(live||r)}</select><button id="sw">切換全組場次</button><button id="ar" class="ghost">封存「${lab(r)}」成績</button><button id="cl" class="ghost">清除本場次事件</button><button id="pn" class="ghost">變更 PIN</button></div></div>`:""}
+  <div class="card"><h2>歷史場次與成績 <span class="mut">${g}</span></h2><div class="tw"><table><tr><th>場次<th>封存日<th>產出<th>活動 CT<th>線平衡<th>稼動率<th>等待<th>gCO₂e<th></tr>
+  ${Object.entries(S.arch).filter(([k])=>k.startsWith(g+"-")).map(([k,a])=>`<tr><td>${k}<td>${new Date(a.t).toLocaleDateString()}<td>${a.n}<td>${f1(a.ct,"s")}<td>${f1(a.lb,"%")}<td>${f1(a.u,"%")}<td>${f1(a.w,"s")}<td>${(a.kg*1000).toFixed(1)}<td>${adm()?`<button class="ghost" data-d="${k}">✕</button>`:""}</tr>`).join("")||'<tr><td colspan=9 class="mut">尚無封存（管理員可封存目前場次成績，改良前後可並排比較）</tr>'}</table></div></div>`;
+  (()=>{const ss=stOf(fl);if(!ss.length)return;let m="graph LR\n";ss.forEach(s=>{const x=c.st[s];m+=`${s}["${s}<br/>${x?x.n+" 件 "+f1(x.ct,"s"):"—"}"]\nclass ${s} ${s===c.bn?"cb":x&&x.util<50?"cw":"cg"}\n`});
+  fl.forEach(f=>{const n=(f.next_station_id||"").trim();if(n)m+=`${f.station_id.trim()} --> ${n}\n`});m+="classDef cb fill:#2a1214,stroke:#f87171,color:#f87171\nclassDef cw fill:#2b2108,stroke:#fbbf24,color:#fbbf24\nclassDef cg fill:#0f2a1a,stroke:#4ade80,color:#4ade80\n";
+  mermaid.render("mm"+Date.now(),m).then(o=>{const e=$("#mm");if(e)e.innerHTML=o.svg}).catch(()=>{})})();
+  const rd=()=>dash();$("#mw").onchange=e=>{mt.w=+e.target.value||0;save();rd()};$("#mc").onchange=e=>{mt.c=+e.target.value||0;save();rd()};
+  if($("#sw")){$("#sw").onclick=async()=>{const v=$("#lm").value;try{await upW(g,"GROUP_MODE",{input_wip:enc(v),output_wip:304});S.round=v;save();toast("✓ 全組已切換為 "+lab(v));route()}catch{toast("切換失敗")}};
+   $("#ar").onclick=()=>{S.arch[fk(g,r)]={t:Date.now(),n:c.outN,ct:c.actCT,lb:c.lb,u:c.util,w:c.wait,b:c.bad,kg:kg+mkg};save();toast("✓ 已封存");rd()};
+   $("#cl").onclick=async()=>{if(!confirm(`永久刪除【${g}・${lab(r)}】所有事件紀錄？（建議先下載 CSV）`))return;try{await api(r==="OFFICIAL"?`event?group_id=eq.${g}&product_id=not.ilike.TEST*`:`event?group_id=eq.${g}&product_id=ilike.TEST${r}-*`,"DELETE");await api(`station_wip?group_id=eq.${fk(g,r)}`,"DELETE");toast("✓ 已清除");rd()}catch{toast("清除失敗")}};
+   $("#pn").onclick=()=>{const n=prompt("新的管理員 PIN（至少 4 碼）");if(n&&n.length>=4){S.pin=n;save();toast("✓ PIN 已更新")}}}
+  document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{if(confirm("刪除此封存成績？")){delete S.arch[b.dataset.d];save();rd()}});$("#w").onchange=e=>{S.watts=+e.target.value||0;save();rd()};$("#co").onchange=e=>{S.coef=+e.target.value;save();rd()};$("#th").onchange=e=>{S.thr=+e.target.value||1.5;save();rd()};
+  $("#csv").onclick=()=>{const h=["id","group_id","product_id","station_id","start_time","finish_time","duration_sec","wip_before_start","wip_after_finish","status"],
+    b=new Blob(["\uFEFF"+[h.join(","),...ev0.map(e=>h.map(k=>`"${e[k]??""}"`).join(","))].join("\n")],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`ie_chair_${g}.csv`;a.click()};
+  }catch(e){$("#dv").innerHTML=`<div class="banner">同步失敗：${esc(e.message)}，稍後自動重試</div>`}}
+function dashView(){$("#app").innerHTML='<div id="dv"><p class="mut">載入中…</p></div>';dash();tm=setInterval(()=>{if(!document.activeElement||!/INPUT|SELECT/.test(document.activeElement.tagName))dash()},3000)}
+// ---- QR 桌牌 ----
+async function qrView(){const g=S.group,r=S.round,pk=fk(g,r),fl=await flows(g,r);let sts=stOf(fl);if(!sts.length)sts=Array.from({length:7},(_,i)=>"ST0"+(i+1));
+  const cf=(S.cfg[pk]??={}),base=location.href.split("#")[0].split("?")[0];
+  $("#app").innerHTML=`<div class="card np"><h2>流程設定 <span class="mut">${pk}</span></h2><div class="row"><button class="ghost" data-p="9">套用 9 站（改良前）</button><button class="ghost" data-p="7">套用 7 站（改良後，表 3）</button><button id="pr">🖨 列印桌牌</button></div>
+  <p class="mut" style="margin-bottom:0">桌牌 QR 會依目前場次產生；各工站可填完工料號與站前初始備料（套），同工站桌牌跨場次可通用。</p></div>${adm()?'<div class="card np"><h2>流程編輯器 <span class="mut">每列＝一條「本站 ➜ 下一站」</span></h2><div id="fr"></div><div class="row"><button class="ghost" id="fa">＋ 新增連線</button><button id="fs">儲存流程</button></div></div>':'<div class="card np mut">🔒 自訂流程需先以右上角鎖頭解鎖管理員</div>'}<div class="grid">
+  ${sts.map(s=>{const pd=fl.filter(f=>(f.next_station_id||"").trim()===s).length,c=cf[s]??={};return`<div class="qc"><h3>${g}・${s}</h3><div class="mut">${pd?"接收半成品":"🏁 起始站"}</div><div class="q" id="q_${s}"></div>
+  <input data-s="${s}" data-k="part" placeholder="完工料號 例如 ASM1" value="${esc(c.part)}">${pd?`<input data-s="${s}" data-k="sub" type="number" min="0" placeholder="站前初始備料（套）" value="${c.sub??""}"><input data-s="${s}" data-k="lim" type="number" min="0" placeholder="半成品 WIP 上限（0＝∞）" value="${c.lim??""}"><input data-s="${s}" data-k="rn" placeholder="專屬零件（如螺絲料盒）" value="${esc(c.rn)}"><input data-s="${s}" data-k="ri" type="number" min="0" placeholder="零件初始備料（顆）" value="${c.ri??""}">`:""}<a class="btn np" style="margin-top:8px;padding:6px 10px;font-size:13px" href="#/timer?${u(s,pd)}">進入計時</a></div>`}).join("")}</div>`;
+  function u(s,pd){const c=cf[s]??{},p=new URLSearchParams({group:g,station:s,round:r});if(c.part)p.set("part",c.part);if(!pd)p.set("root","1");else{if(+c.sub>0)p.set("sub",c.sub);if(+c.lim>0)p.set("lim",c.lim);if(c.rn){p.set("rn",c.rn);p.set("ri",c.ri||0)}}return p}
+  const draw=()=>sts.forEach(s=>{const el=$("#q_"+s);el.innerHTML="";const pd=fl.some(f=>(f.next_station_id||"").trim()===s);new QRCode(el,{text:`${base}#/timer?${u(s,pd)}`,width:140,height:140,correctLevel:QRCode.CorrectLevel.M})});draw();
+  document.querySelectorAll(".qc input").forEach(i=>i.onchange=()=>{cf[i.dataset.s][i.dataset.k]=i.value.trim();save();draw()});
+  $("#pr").onclick=()=>print();
+  if($("#fr")){let rw=fl.map(f=>({s:f.station_id.trim(),n:(f.next_station_id||"").trim(),nm:f.station_name||""}));
+   const op=(v,e)=>`<option value="">${e?"（成品出口）":"—"}</option>`+Array.from({length:10},(_,i)=>{const t="ST"+String(i+1).padStart(2,"0");return`<option ${t==v?"selected":""}>${t}</option>`}).join("");
+   const dw=()=>{$("#fr").innerHTML=rw.map((x,i)=>`<div class="row" style="margin-bottom:6px"><select data-i="${i}" data-k="s">${op(x.s)}</select>➜<select data-i="${i}" data-k="n">${op(x.n,1)}</select><input data-i="${i}" data-k="nm" placeholder="工站名稱" value="${esc(x.nm)}"><button class="ghost" data-x="${i}">✕</button></div>`).join("")||'<p class="mut">尚無連線，按「新增」或套用預設流程。</p>';
+    document.querySelectorAll("#fr [data-k]").forEach(e=>e.onchange=()=>rw[e.dataset.i][e.dataset.k]=e.value);document.querySelectorAll("#fr [data-x]").forEach(b=>b.onclick=()=>{rw.splice(+b.dataset.x,1);dw()})};dw();
+   $("#fa").onclick=()=>{rw.push({s:"",n:"",nm:""});dw()};
+   $("#fs").onclick=async()=>{const ok=rw.filter(x=>x.s);if(!ok.length)return toast("請至少設定一個工站");try{await api(`station_flow?group_id=eq.${pk}`,"DELETE");await api("station_flow","POST",ok.map(x=>({group_id:pk,station_id:x.s,station_name:x.nm,next_station_id:x.n})));toast("✓ 流程已儲存");qrView()}catch(e){toast("儲存失敗："+e.message)}}}
+  document.querySelectorAll("[data-p]").forEach(b=>b.onclick=async()=>{const P=PRESET[b.dataset.p];if(!confirm(`將【${pk}】流程改為 ${b.dataset.p} 站？既有流程會被取代（不影響已記錄的事件）。`))return;
+    try{await api(`station_flow?group_id=eq.${pk}`,"DELETE");await api("station_flow","POST",P.n.map((n,i)=>({group_id:pk,station_id:"ST0"+(i+1),station_name:n,next_station_id:P.nx(i)})));toast("✓ 流程已更新");qrView()}catch(e){toast("更新失敗："+e.message)}})}
+// ---- 計時器（QR 掃碼開工／完工）----
+async function timerView(q){const g=q.group||S.group,st=q.station;let r=q.round||S.round;try{const gm=await api(`station_wip?group_id=eq.${g}&station_id=eq.GROUP_MODE&select=input_wip`);if(gm.length&&dec(gm[0].input_wip))r=dec(gm[0].input_wip)}catch{}
+  if(!st){$("#app").innerHTML='<div class="card">請掃描工站桌牌上的 QR Code，或到<a href="#/qr">「桌牌」頁</a>點選工站進入計時。</div>';return}
+  const fl=await flows(g,r).catch(()=>[]),preds=fl.filter(f=>(f.next_station_id||"").trim()===st).map(f=>f.station_id.trim()),root=q.root==="1"||!preds.length,
+  nx=(fl.find(f=>f.station_id.trim()===st)||{}).next_station_id||"";
+  T={g,st,r,root,preds,succ:fl.filter(f=>f.station_id.trim()===st).map(f=>(f.next_station_id||"").trim()).filter(Boolean),rn:q.rn||"",ri:+q.ri||0,lim:+q.lim||0,sub:+q.sub||0,t0:0,lock:0,avail:Infinity,n:0};
+  $("#app").innerHTML=`<div class="card"><div class="row"><b style="font-size:20px">${esc(g)}・${esc(st)}</b><span class="mut">${r==="OFFICIAL"?"🏆 正式實作":"🧪 第 "+esc(r)+" 次測試"}${q.part?"｜料號 "+esc(q.part):""}</span></div>
+  <p class="mut" style="margin:6px 0 0">📥 前置：${preds.join("、")||"原料直接進入（起始站）"}　📤 送往：${esc(nx)||"成品出口"}</p></div>
+  <div class="kpis"><div class="kpi"><b id="av">-</b><span>站前可用量（套）</span></div><div class="kpi"><b id="dn">0</b><span>本站累計完工</span></div>${T.rn?`<div class="kpi"><b id="rw">-</b><span>${esc(T.rn)} 剩餘（顆）</span></div>`:""}</div>${root?"":`<div class="card"><label class="mut">🛑 本站半成品 WIP 上限（超過時前站暫停送料） <select id="lm2">${LIMS}</select></label></div>`}
+  <div class="card"><div class="row" style="justify-content:center;margin-bottom:6px"><button class="ghost" data-m="scan">📷 掃碼切換</button><button class="ghost" data-m="btn">👆 按鈕切換</button></div><div class="big" id="clk">00:00.0</div><button class="act" id="go">開始</button>
+  <div class="row" style="margin-top:10px"><label class="mut">不良／重工原因 <select id="df"><option value="">無（良品）</option><option>漏裝</option><option>裝錯零件</option><option>鬆動</option><option>刮傷</option><option>其他</option></select></label></div>
+  <div id="cam"></div><p id="sts" style="text-align:center;margin:0;color:var(--warn);font-weight:700"></p><p id="hint" class="mut" style="text-align:center;margin:0"></p></div>
+  <div class="card"><h2>本站最近紀錄</h2><div id="hs" class="mut">載入中…</div></div>`;
+  $("#go").onclick=toggle;T.tick=setInterval(()=>{if(T.t0){const s=(Date.now()-T.t0)/1000;$("#clk").textContent=`${String(Math.floor(s/60)).padStart(2,"0")}:${(s%60).toFixed(1).padStart(4,"0")}`}},100);
+  document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+  const ls=$("#lm2");if(ls)ls.onchange=async()=>{try{await upW(fk(T.g,T.r),T.st+"_LIMIT",{input_wip:+ls.value,output_wip:0});toast("✓ 上限已更新");refresh()}catch{toast("更新失敗")}};
+  await setMode(S.tmode);refresh();tm=setInterval(refresh,3000)}
+async function setMode(m){S.tmode=m;save();document.querySelectorAll("[data-m]").forEach(b=>{const on=b.dataset.m===m;b.style.background=on?"var(--pri)":"transparent";b.style.color=on?"#03211d":"var(--pri)"});
+  $("#go").style.display=m==="btn"?"block":"none";$("#cam").style.display=m==="scan"?"block":"none";$("#hint").textContent=m==="scan"?"📷 對準本站桌牌 QR：第一次掃＝開工，再掃＝完工（開工後 3 秒內防誤掃）":"👆 按下方按鈕開工／完工，不需再掃碼";
+  if(T.cam){try{await T.cam.stop()}catch{}T.cam=null}
+  if(m==="scan"){try{T.cam=new Html5Qrcode("cam");await T.cam.start({facingMode:"environment"},{fps:10,qrbox:220},onScan)}catch{toast("相機無法啟動，請改用按鈕模式")}}}
+async function refresh(){const{g,st,r}=T;try{const[w,e]=await Promise.all([api(`station_wip?group_id=eq.${fk(g,r)}&select=station_id,input_wip,output_wip`),api(`event?group_id=eq.${g}&station_id=eq.${st}&select=*&order=start_time.asc`)]);
+  const m={},lm={};w.forEach(x=>{const k=x.station_id.trim();k.endsWith("_LIMIT")?lm[k.slice(0,-6)]=x.input_wip||0:m[k]=x.output_wip||0});const ev=e.filter(x=>inRound(x,r));T.n=ev.length;
+  T.avail=T.root?Infinity:Math.min(...T.preds.map(p=>m[p]??0))+T.sub-T.n;
+  T.blk=T.succ.find(s=>lm[s]>0&&T.n-(m[s]??0)>=lm[s]);T.rawE=!!T.rn&&T.ri-T.n<=0;if(T.rn)$("#rw").textContent=Math.max(0,T.ri-T.n);const ls=$("#lm2");if(ls){if(T.lim>0&&lm[T.st]===undefined&&!T.lw){T.lw=1;ls.value=T.lim;ls.onchange()}else if(document.activeElement!==ls)ls.value=lm[T.st]??0}
+  $("#av").textContent=T.root?"∞":Math.max(0,T.avail);$("#dn").textContent=T.n;
+  $("#hs").innerHTML=ev.slice(-6).reverse().map(x=>`${esc(x.product_id)}　${f1(+x.duration_sec,"s")}　${esc(x.status)}`).join("<br>")||"尚無紀錄";
+  if(!T.t0){const b=$("#go");b.disabled=(!T.root&&T.avail<=0)||!!T.blk||T.rawE;b.textContent=T.blk?"🛑 下游 "+T.blk+" 半成品已達上限":T.rawE?"📦 "+T.rn+" 用完，請補料":b.disabled?"⏳ 等待前站供料":"開始";$("#sts").textContent=b.disabled?b.textContent:""}}catch{}}
+function onScan(txt){const p=new URLSearchParams((txt.split("?")[1]||"").split("#")[0]);
+  if(p.get("group")!==T.g||p.get("station")!==T.st){if(Date.now()>(onScan.w||0)){onScan.w=Date.now()+2500;toast("這不是本站的 QR Code")}return}toggle()}
+async function toggle(){if(Date.now()<T.lock||T.busy)return;
+  if(!T.t0){if((!T.root&&T.avail<=0)||T.blk||T.rawE){beep(200,.3);toast(T.blk?"下游半成品已達上限":T.rawE?"專屬零件已用完":"前站尚未供料，請稍候");return}
+    T.t0=Date.now();T.snap=T.root?0:T.avail;T.lock=Date.now()+3000;beep(784);setTimeout(()=>beep(988),130);const b=$("#go");b.textContent="完工";b.className="act fin";b.disabled=false;return}
+  T.busy=1;const t1=Date.now(),dur=+((t1-T.t0)/1000).toFixed(1),n=T.n+1,d=$("#df").value;beep(523);setTimeout(()=>beep(659),130);setTimeout(()=>beep(784),260);
+  try{await api("event","POST",{group_id:T.g,station_id:T.st,product_id:`${pre(T.r)}P${String(n).padStart(2,"0")}`,start_time:new Date(T.t0).toISOString(),finish_time:new Date(t1).toISOString(),duration_sec:dur,status:d?"REWORK:"+d:"COMPLETED",wip_before_start:T.snap,wip_after_finish:n});
+    const k=fk(T.g,T.r),x=await api(`station_wip?group_id=eq.${k}&station_id=eq.${T.st}&select=id`),body={input_wip:T.sub,output_wip:n,updated_at:new Date().toISOString()};
+    x.length?await api(`station_wip?id=eq.${x[0].id}`,"PATCH",body):await api("station_wip","POST",{group_id:k,station_id:T.st,...body});
+    toast(`✓ 已記錄 ${dur} 秒`);T.t0=0;T.lock=Date.now()+4000;$("#clk").textContent="00:00.0";$("#df").value="";$("#go").className="act"}
+  catch(e){toast("寫入失敗，請再掃一次："+e.message)}T.busy=0;refresh()}
+// ---- 路由 ----
+function stop(){clearInterval(tm);clearInterval(T.tick);if(T.cam){T.cam.stop().catch(()=>{});T.cam=null}}
+function route(){stop();const[p,qs]=(location.hash||"#/dashboard").slice(2).split("?"),q=Object.fromEntries(new URLSearchParams(qs||"")),v=["dashboard","qr","timer"].includes(p)?p:"dashboard";
+  if(v!=="timer"){if(q.group&&/^G\d+$/i.test(q.group))S.group=q.group.toUpperCase();if(q.round)S.round=q.round.toUpperCase();save()}
+  document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));$("#ctl").style.display=v==="timer"?"none":"flex";
+  $("#lk").textContent=adm()?"🔓 管理員":"🔒";$("#g").value=S.group;$("#r").value=S.round;v==="dashboard"?dashView():v==="qr"?qrView():timerView(q)}
+$("#g").innerHTML=Array.from({length:25},(_,i)=>`<option>G${String(i+1).padStart(2,"0")}</option>`).join("");
+$("#r").innerHTML=Array.from({length:10},(_,i)=>`<option value="${i+1}">🧪 第 ${i+1} 次測試</option>`).join("")+'<option value="OFFICIAL">🏆 正式實作</option>';
+$("#g").onchange=e=>{S.group=e.target.value;save();route()};$("#r").onchange=e=>{S.round=e.target.value;save();route()};
+$("#lk").onclick=()=>{if(adm()){adT=0;sessionStorage.adT=0;return route()}const p=prompt("輸入管理員 PIN（預設 0000）");if(p===null)return;if(p===S.pin){adT=Date.now()+6e5;sessionStorage.adT=adT;route()}else toast("PIN 錯誤")};
+addEventListener("hashchange",route);route();
+</script>
+</body>
+</html>
